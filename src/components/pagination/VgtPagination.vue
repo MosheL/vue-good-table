@@ -17,7 +17,7 @@
             :value="option">
             {{ option }}
           </option>
-          <option v-if="paginateDropdownAllowAll" :value="-1">{{allText}}</option>
+          <option v-if="paginateDropdownAllowAll" :value="total">{{allText}}</option>
         </select>
       </form>
     </div>
@@ -137,8 +137,11 @@ export default {
       immediate: true,
     },
 
-    customRowsPerPageDropdown() {
+    customRowsPerPageDropdown: {
+      handler() {
       this.handlePerPage();
+    },
+      deep: true,
     },
 
     total: {

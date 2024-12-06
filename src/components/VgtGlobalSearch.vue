@@ -34,6 +34,11 @@ export default {
     'searchEnabled',
     'globalSearchPlaceholder',
   ],
+  emits: [
+    'input',
+    'keyup',
+    'enter',
+  ],
   data() {
     return {
       globalSearchTerm: null,
@@ -50,10 +55,10 @@ export default {
   methods: {
     updateValue(value) {
       this.$emit('input', value);
-      this.$emit('on-keyup', value);
+      this.$emit('keyup', value);
     },
     entered(value) {
-      this.$emit('on-enter', value);
+      this.$emit('enter', value);
     },
     getId() {
       return `vgt-search-${Math.floor(Math.random() * Date.now())}`;

@@ -1,9 +1,13 @@
 <template>
 <tr v-if="hasFilterRow">
+  <th v-if="expandRowsEnabled"></th>
   <th v-if="lineNumbers"></th>
   <th v-if="selectable"></th>
+  <template
+    v-for="(column, index) in columns"
+    :key="index"
+  >
   <th
-    v-for="(column, index) in columns" :key="index"
     v-if="!column.hidden"
     :class="getClasses(column)"
     >
@@ -56,6 +60,7 @@
       </div>
     </slot>
   </th>
+  </template>
 </tr>
 </template>
 
@@ -66,11 +71,13 @@ export default {
   props: [
     'lineNumbers',
     'columns',
+    'expandRowsEnabled',
     'typedColumns',
     'globalSearchEnabled',
     'selectable',
     'mode',
   ],
+  emits: ['filter-changed'],
   watch: {
     columns: {
       handler(newValue, oldValue) {
@@ -185,7 +192,7 @@ export default {
     },
 
     updateFiltersImmediately(field, value) {
-      this.$set(this.columnFilters, this.fieldKey(field), value);
+      this.columnFilters[this.fieldKey(field)] = value;
       this.$emit('filter-changed', this.columnFilters);
     },
 
@@ -197,7 +204,7 @@ export default {
         if (this.isFilterable(col)
           && typeof col.filterOptions.filterValue !== 'undefined'
           && col.filterOptions.filterValue !== null) {
-          this.$set(this.columnFilters, this.fieldKey(col.field), col.filterOptions.filterValue);
+          this.columnFilters[this.fieldKey(col.field)] = col.filterOptions.filterValue;
           // this.updateFilters(col, col.filterOptions.filterValue);
           // this.$set(col.filterOptions, 'filterValue', undefined);
         }

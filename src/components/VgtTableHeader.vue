@@ -9,15 +9,26 @@
         :indeterminate.prop="allSelectedIndeterminate"
         @change="toggleSelectAll" @click.right.prevent.stop="toggleSelectAll" />
     </th>
-    <th v-for="(column, index) in columns"
+    <th
       scope="col"
+      v-if="expandRowsEnabled"
+      class="vgt-checkbox-col">
+      <a href="" @click.prevent="toggleExpandRowsAll" class="vgt-wrap__expander">
+        (+)
+      </a>
+    </th>
+    <template
+        v-for="(column, index) in columns"
       :key="index"
+    >
+      <th v-if="!column.hidden"
+        scope="col"
       :title="column.tooltip"
       :class="getHeaderClasses(column, index)"
       :style="columnStyles[index]"
       :aria-sort="getColumnSortLong(column)"
       :aria-controls="`col-${index}`"
-      v-if="!column.hidden">
+      >
       <slot name="table-column" :column="column">
         {{column.label}}
       </slot>
@@ -30,29 +41,27 @@
         </button>
       <span class="drag" @dblclick="$emit('resetResize',index)" @mousedown="startResize($event,index)">&nbsp;</span>
     </th>
+    </template>
   </tr>
-  <tr
-    is="vgt-filter-row"
+  <vgt-filter-row
     ref="filter-row"
     @filter-changed="filterRows"
     :global-search-enabled="searchEnabled"
     :line-numbers="lineNumbers"
+    :expand-rows-enabled="expandRowsEnabled"
     :selectable="selectable"
     :columns="columns"
     :mode="mode"
     :typed-columns="typedColumns">
-      <template
-        slot="column-filter"
-        slot-scope="props"
-      >
+      <template #column-filter="slotProps">
         <slot
           name="column-filter"
-          :column="props.column"
-          :updateFilters="props.updateFilters"
+          :column="slotProps.column"
+          :updateFilters="slotProps.updateFilters"
         >
         </slot>
       </template>
-  </tr>
+  </vgt-filter-row>
 </thead>
 </template>
 
@@ -82,6 +91,10 @@ export default {
     columns: {
       type: Array,
     },
+    expandRowsEnabled: {
+      default: false,
+      type: Boolean,
+    },
     mode: {
       type: String,
     },
@@ -109,12 +122,19 @@ export default {
 
     paginated: {},
   },
+  emits: [
+    'toggle-select-all',
+    'toggle-expand-rows-all',
+    'sort-change',
+    'filter-changed',
+  ],
   watch: {
     columns: {
       handler() {
         this.setColumnStyles();
       },
       immediate: true,
+      deep: true
     },
     tableRef: {
       handler() {
@@ -174,6 +194,9 @@ export default {
     reset() {
       this.$refs['filter-row'].reset(true);
     },
+    toggleExpandRowsAll() {
+      this.$emit('toggle-expand-rows-all');
+    },
     toggleSelectAll(e) {
       this.$emit('on-toggle-select-all',{revert:  !!e.button });
     },
@@ -191,12 +214,12 @@ export default {
       } else {
         this.sorts = primarySort(this.sorts, column);
       }
-      this.$emit('on-sort-change', this.sorts);
+      this.$emit('sort-change', this.sorts);
     },
 
     setInitialSort(sorts) {
       this.sorts = sorts;
-      this.$emit('on-sort-change', this.sorts);
+      this.$emit('sort-change', this.sorts);
     },
 
     getColumnSort(column) {
@@ -231,7 +254,7 @@ export default {
       if (window && window.getComputedStyle && dom) {
         const cellStyle = window.getComputedStyle(dom, null);
         return {
-          width: cellStyle.width
+          width: cellStyle.width,
         };
       }
       return {
@@ -252,7 +275,7 @@ export default {
           colStyles.push({
             minWidth: this.columns[i].width ? this.columns[i].width : 'auto',
             maxWidth: this.columns[i].width ? this.columns[i].width : 'auto',
-            width: this.columns[i].width ? this.columns[i].width : 'auto'
+            width: this.columns[i].width ? this.columns[i].width : 'auto',
           });
         }
       }
@@ -297,7 +320,7 @@ export default {
       }
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.ro) {
       this.ro.disconnect();
     }

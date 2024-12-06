@@ -1,6 +1,6 @@
 import path from 'path'
 import { defineConfig } from 'vite'
-import Vue2 from '@vitejs/plugin-vue2'
+import Vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 
 const myPlugin = () => ({
@@ -28,7 +28,7 @@ const config = defineConfig({
 
 	plugins: [
 		myPlugin(),
-		Vue2(),
+		Vue(),
 		AutoImport({
 			imports: [
 				'vue',
