@@ -25,6 +25,9 @@ const config = defineConfig({
 	build: {
 		minify: true,
 	},
+	css: {preprocessorOptions: {
+		scss: {additionalData: "@use 'sass:color';"}
+	}},
 
 	plugins: [
 		myPlugin(),

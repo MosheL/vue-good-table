@@ -486,6 +486,8 @@ export default {
 
     // text options
 		nextText: "Next",
+    lastText: 'Last',
+    firstText: 'First',
 		prevText: "Previous",
 		rowsPerPageText: "Rows per page",
 		ofText: "of",
@@ -561,6 +563,7 @@ export default {
 		"row-mouseenter",
 		"row-mouseleave",
 		"column-filter",
+    "drag"
 	],
 
   watch: {
@@ -1141,7 +1144,7 @@ export default {
     toggleExpand(id) {
       const headerRow = this.filteredRows.find(r => r[this.rowKeyField] === id);
       if (headerRow) {
-        this.$set(headerRow, 'vgtIsExpanded', !headerRow.vgtIsExpanded);
+        headerRow.vgtIsExpanded = !headerRow.vgtIsExpanded;
       }
 			if (this.maintainExpanded && headerRow.vgtIsExpanded) {
         this.expandedRowKeys.add(headerRow[this.rowKeyField]);
@@ -1333,11 +1336,11 @@ export default {
       if (event.shiftKey && this.lastIndex > -1) { // support for multiple select with shift
         const lastI = this.lastIndex;
         const first = Math.min(lastI, currentIndex), last = Math.max(lastI, currentIndex);
-        for (let i = first; i <= last;i++) this.$set(this.rows[i], 'vgtSelected', !row.vgtSelected);
+        for (let i = first; i <= last;i++) this.rows[i].vgtSelected = !row.vgtSelected;
       }
       this.lastIndex = currentIndex;
-      this.$set(row, 'vgtSelected', !row.vgtSelected);
-      this.$emit('on-row-click', {
+      row.gtSelected= !row.vgtSelected;
+      this.$emit('row-click', {
         row,
         pageIndex: currentIndex,
         selected: !!row.vgtSelected,
@@ -1889,7 +1892,8 @@ export default {
       }
     },
     calculateTopSize() {
-      this.$nextTick(() => {
+      this.$nextTick(() => { debugger;
+        console.log("ctts");
         const heads = this.$el.querySelectorAll('thead');
         if (!heads[1])
           return;
@@ -1928,5 +1932,5 @@ export default {
 </script>
 
 <style lang="scss">
-@import "../styles/style";
+@use "../styles/style";
 </style>

@@ -1,3 +1,5 @@
+@use "variables";
+
 /* Utility styles
 ************************************************/
 .vgt-right-align{
@@ -33,7 +35,7 @@
 }
 
 .vgt-text-disabled{
-  color: $secondary-text-color;
+  color: variables.$secondary-text-color;
 }
 
 .sr-only {

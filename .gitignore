@@ -3,3 +3,4 @@ npm-debug.log
 node_modules/
 /.vs
 /src/auto-imports.d.ts
+/dist/vue-good-table-next.cjs.prod.js
