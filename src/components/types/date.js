@@ -5,10 +5,23 @@ const date = Object.assign({}, def);
 
 date.isRight = true;
 
+/**
+ * Compare the two dates and return 1 if the first date is after the second, -1 if the first date is before the second or 0 if dates are equal.
+ * @param {*} x Date 1
+ * @param {*} y Date 2
+ * @param {Object} column Additional parameters (e.g. dateInputFormat, dateOutputFormat)
+ * @returns 
+ */
 date.compare = function (x, y, column) {
   function cook(d) {
     if (column && column.dateInputFormat) {
       return parse(`${d}`, `${column.dateInputFormat}`, new Date());
+    } else if (typeof d === 'string') {
+      try {
+        return Date.parse(d);
+      } catch(err) {
+        return d;
+      }
     }
     return d;
   }
