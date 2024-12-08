@@ -7,7 +7,7 @@
         type="checkbox"
         :checked="allSelected"
         :indeterminate.prop="allSelectedIndeterminate"
-        @change="toggleSelectAll" />
+        @change="toggleSelectAll" @click.right.prevent.stop="toggleSelectAll" />
     </th>
     <th
       scope="col"
@@ -19,19 +19,19 @@
     </th>
     <template
         v-for="(column, index) in columns"
-        :key="index"
+      :key="index"
     >
       <th v-if="!column.hidden"
         scope="col"
-        :title="column.tooltip"
-        :class="getHeaderClasses(column, index)"
-        :style="columnStyles[index]"
-        :aria-sort="getColumnSortLong(column)"
-        :aria-controls="`col-${index}`"
+      :title="column.tooltip"
+      :class="getHeaderClasses(column, index)"
+      :style="columnStyles[index]"
+      :aria-sort="getColumnSortLong(column)"
+      :aria-controls="`col-${index}`"
       >
-        <slot name="table-column" :column="column">
-          {{column.label}}
-        </slot>
+      <slot name="table-column" :column="column">
+        {{column.label}}
+      </slot>
         <button
         v-if="isSortableColumn(column)"
         @click="sort($event, column)">
@@ -39,7 +39,8 @@
           Sort table by {{ column.label }} in {{ getColumnSortLong(column) }} order
           </span>
         </button>
-      </th>
+      <span class="drag" @dblclick="$emit('resetResize',index)" @mousedown="startResize($event,index)">&nbsp;</span>
+    </th>
     </template>
   </tr>
   <vgt-filter-row
@@ -162,15 +163,42 @@ export default {
   computed: {
 
   },
-  methods: {
+    methods: {
+      //resize
+    startResize(event,index) {
+      this.resizing = true;
+      this.resizeIndex = index;
+      this.startX = event.pageX;
+      document.addEventListener('mousemove', this.handleResize);
+      document.addEventListener('mouseup', this.stopResize);
+    },
+    handleResize(event) {
+      if (this.resizing) {
+        const delta =( event.pageX - this.startX)*-1 //rtl -1;
+        if (!delta) return;
+        this.$emit("drag", this.resizeIndex, delta, event.target.parentNode.offsetWidth );
+        this.startX = event.pageX;
+      }
+    },
+    stopResize() {
+      if (this.resizing) {
+        this.resizing = false;
+        document.removeEventListener('mousemove', this.handleResize);
+        document.removeEventListener('mouseup', this.stopResize);
+      }
+    } ,
+
+
+
+
     reset() {
       this.$refs['filter-row'].reset(true);
     },
     toggleExpandRowsAll() {
       this.$emit('toggle-expand-rows-all');
     },
-    toggleSelectAll() {
-      this.$emit('toggle-select-all');
+    toggleSelectAll(e) {
+      this.$emit('toggle-select-all',{revert:  !!e.button });
     },
     isSortableColumn(column) {
       const { sortable } = column;
