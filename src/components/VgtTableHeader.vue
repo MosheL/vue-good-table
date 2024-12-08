@@ -198,7 +198,7 @@ export default {
       this.$emit('toggle-expand-rows-all');
     },
     toggleSelectAll(e) {
-      this.$emit('on-toggle-select-all',{revert:  !!e.button });
+      this.$emit('toggle-select-all',{revert:  !!e.button });
     },
     isSortableColumn(column) {
       const { sortable } = column;

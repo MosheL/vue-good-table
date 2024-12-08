@@ -1,5 +1,5 @@
 /*!
-  * vue-good-table-next v0.2.2
+  * vue-good-table-next v0.2.3.3
   * (c) 2021-present Boris Flesch <boris@singlequote.net>
   * (c) 2017-2021 xaksis <shay@crayonbits.com>
   * @license MIT
@@ -3331,7 +3331,7 @@ const _sfc_main$2 = {
       this.$emit('toggle-expand-rows-all');
     },
     toggleSelectAll(e) {
-      this.$emit('on-toggle-select-all',{revert:  !!e.button });
+      this.$emit('toggle-select-all',{revert:  !!e.button });
     },
     isSortableColumn(column) {
       const { sortable } = column;
@@ -10322,7 +10322,7 @@ const _sfc_main = {
     // internal select options
     selectable: false,
     selectOnCheckboxOnly: false,
-    selectAllByPage: true,
+    selectAllByPage: false,
     disableSelectInfo: false,
 		selectionInfoClass: "",
 		selectionText: n => n + ' row' + (n !== 1 ? 's' : '') + ' selected',
@@ -10931,7 +10931,7 @@ const _sfc_main = {
     },
 
     hasRowClickListener() {
-			return this.$attrs && this.$attrs['onRowClick'];
+			return this?._.vnode?.props['onRowClick'];
     },
   },
 
@@ -11041,7 +11041,7 @@ const _sfc_main = {
       const rows = this.selectAllByPage ? this.paginated : this.filteredRows;
       rows.forEach((headerRow) => {
         headerRow.children.forEach((row) => {
-					row["vgtSelected"] = true;
+					row.vgtSelected = e.revert ? !row.vgtSelected : true;
         });
       });
       this.emitSelectedRows();
@@ -11160,7 +11160,7 @@ const _sfc_main = {
         for (let i = first; i <= last;i++) this.rows[i].vgtSelected = !row.vgtSelected;
       }
       this.lastIndex = currentIndex;
-      row.gtSelected= !row.vgtSelected;
+      row.vgtSelected= !row.vgtSelected;
       this.$emit('row-click', {
         row,
         pageIndex: currentIndex,

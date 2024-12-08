@@ -356,20 +356,6 @@ Object.keys(coreDataTypes).forEach((key) => {
   function flat(obj) { return JSON.parse(JSON.stringify(obj)) }
 
 
-
-function debounce(func, delay) {
-  let timeoutId;
-  return function() {
-    const context = this;
-    const args = arguments;
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      func.apply(context, args);
-    }, delay);
-  };
-  }
-
-
 export default {
   name: 'vue-good-table',
   props: {
@@ -497,7 +483,7 @@ export default {
     // internal select options
     selectable: false,
     selectOnCheckboxOnly: false,
-    selectAllByPage: true,
+    selectAllByPage: false,
     disableSelectInfo: false,
 		selectionInfoClass: "",
 		selectionText: n => n + ' row' + (n !== 1 ? 's' : '') + ' selected',
@@ -1110,7 +1096,7 @@ export default {
     },
 
     hasRowClickListener() {
-			return this.$attrs && this.$attrs['onRowClick'];
+			return this?._.vnode?.props['onRowClick'];
     },
   },
 
@@ -1220,7 +1206,7 @@ export default {
       const rows = this.selectAllByPage ? this.paginated : this.filteredRows;
       rows.forEach((headerRow) => {
         headerRow.children.forEach((row) => {
-					row["vgtSelected"] = true;
+					row.vgtSelected = e.revert ? !row.vgtSelected : true;
         });
       });
       this.emitSelectedRows();
@@ -1339,7 +1325,7 @@ export default {
         for (let i = first; i <= last;i++) this.rows[i].vgtSelected = !row.vgtSelected;
       }
       this.lastIndex = currentIndex;
-      row.gtSelected= !row.vgtSelected;
+      row.vgtSelected= !row.vgtSelected;
       this.$emit('row-click', {
         row,
         pageIndex: currentIndex,
