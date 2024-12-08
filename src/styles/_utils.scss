@@ -1,3 +1,5 @@
+@use "variables";
+
 /* Utility styles
 ************************************************/
 .vgt-right-align{
@@ -26,14 +28,14 @@
   clear: both;
 }
 
-.vgt-responsive {
+.vgt-responsive-old {
   width: 100%;
   overflow-x: auto;
   position: relative;
 }
 
 .vgt-text-disabled{
-  color: $secondary-text-color;
+  color: variables.$secondary-text-color;
 }
 
 .sr-only {
