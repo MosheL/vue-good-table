@@ -42,8 +42,7 @@
       >
         <span
           aria-hidden="true"
-          class="chevron"
-          v-bind:class="{ left: !rtl, right: rtl }"
+          class="chevron start"
         ></span>
         <span>{{ firstText }}</span>
       </button>
@@ -54,7 +53,7 @@
         class="footer__navigation__page-btn"
         :class="{ disabled: !prevIsPossible }"
         @click.prevent.stop="previousPage">
-        <span aria-hidden="true" class="chevron" v-bind:class="{ 'left': !rtl, 'right': rtl }"></span>
+        <span aria-hidden="true" class="chevron start"></span>
         <span>{{prevText}}</span>
       </button>
 
@@ -65,7 +64,7 @@
         :class="{ disabled: !nextIsPossible }"
         @click.prevent.stop="nextPage">
         <span>{{nextText}}</span>
-        <span aria-hidden="true" class="chevron" v-bind:class="{ 'right': !rtl, 'left': rtl }"></span>
+        <span aria-hidden="true" class="chevron end"></span>
       </button>
 
       <button
@@ -79,8 +78,7 @@
         <span>{{ lastText }}</span>
         <span
           aria-hidden="true"
-          class="chevron"
-          v-bind:class="{ right: !rtl, left: rtl }"
+          class="chevron end"
         ></span>
       </button>
     </div>

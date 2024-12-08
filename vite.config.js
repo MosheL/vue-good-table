@@ -9,7 +9,6 @@ const myPlugin = () => ({
 		server.httpServer.keepAlive = true;
 		server.httpServer.httpAllowHalfOpen = true;
 		server.httpServer.keepAliveTimeout = 999999;
-		console.log(server.httpServer)
 	},
 })
 

@@ -55,8 +55,7 @@ $footer-font-size: 1.1rem;
       top: 50%;
       margin-top: -1px;
       border-top:  6px solid variables.$text-color;
-      border-left: 6px solid transparent;
-      border-right: 6px solid transparent;
+      border-inline: 6px solid transparent;
       border-bottom: none;
       pointer-events: none
     }
@@ -89,11 +88,11 @@ $footer-font-size: 1.1rem;
       &.disabled:hover {
         opacity: 0.5;
         cursor: not-allowed;
-        .chevron.left:after{
-          border-right-color: variables.$text-color;
+        .chevron.start:after{
+          border-inline-start-color: variables.$text-color;
         }
-        .chevron.right:after{
-          border-left-color: variables.$text-color;
+        .chevron.end:after{
+          border-inline-end-color: variables.$text-color;
         }
       }
       span{
@@ -113,26 +112,20 @@ $footer-font-size: 1.1rem;
           content:  '';
           position:  absolute;
           display:  block;
-          left:  50%;
+          inset-inline-start:  50%;
           top:  50%;
           margin-top:  -6px;
           border-top: 6px solid transparent;
           border-bottom: 6px solid transparent;
+          margin-inline-start:  -3px;
         }
-        &.left::after{
-          border-right:  6px solid variables.$link-color;
-          margin-left:  -3px;
-        }
-      
-        &.right::after{
-          border-left:  6px solid variables.$link-color;
-          margin-left:  -3px;
-        }
+        &.start::after {border-inline-end:  6px solid variables.$link-color;}
+        &.end::after {border-inline-start:  6px solid variables.$link-color;}
       }
     }
     &__info, &__page-info{
       display: inline-block;
-      margin:  0px 16px;
+      margin-inline:   16px;
     }
     &__page-info{
       span{
@@ -144,7 +137,7 @@ $footer-font-size: 1.1rem;
         text-align: center;
         vertical-align: middle;
         display: inline-block;
-        margin: 0px 10px;
+        margin-inline: 10px;
         font-weight: bold;
       }
     }

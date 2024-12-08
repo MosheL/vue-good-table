@@ -32,8 +32,7 @@ $sort-chevron-width: 5px;
           inset-inline-end: 6px;
           top: 50%;
           margin-top: -7px;
-          border-left: $sort-chevron-width solid transparent;
-          border-right: $sort-chevron-width solid transparent;
+          border-inline: $sort-chevron-width solid transparent;
           border-bottom: $sort-chevron-width solid variables.$chevron-color;
         }
         &:before{
@@ -44,8 +43,7 @@ $sort-chevron-width: 5px;
           inset-inline-end: 6px;
           top: 50%;
           margin-bottom: -7px;
-          border-left: $sort-chevron-width solid transparent;
-          border-right: $sort-chevron-width solid transparent;
+          border-inline: $sort-chevron-width solid transparent;
           border-top: $sort-chevron-width solid variables.$chevron-color;
         }
       }
@@ -80,7 +78,7 @@ $sort-chevron-width: 5px;
         content: '';
         position: absolute;
         display: block;
-        left: 50%;
+        inset-inline-start: 50%;
         top: 50%;
         margin-top: -6px;
         border-top: 6px solid transparent;

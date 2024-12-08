@@ -22,7 +22,7 @@
   //th
   & th.line-numbers, & th.vgt-checkbox-col {
     color: variables.$text-color;
-    border-right: 1px solid variables.$border-color;
+    border-inline-end: 1px solid variables.$border-color;
     background: linear-gradient(variables.$thead-bg-color-1, variables.$thead-bg-color-2);
   }
   thead th{
@@ -80,7 +80,7 @@
     background: linear-gradient(variables.$thead-bg-color-1, variables.$thead-bg-color-2);
     .footer__row-count{
       position: relative;
-      padding-right: 3px;
+      padding-inline-end: 3px;
       &__label{
         color: variables.$secondary-text-color;
       }
@@ -91,8 +91,8 @@
         -webkit-appearance: none; 
         -moz-appearance: none;
         appearance: none;
-        padding-right: 15px;
-        padding-left: 5px;
+        padding-inline-end: 15px;
+        padding-inline-start : 5px;
         border-radius: 3px;
         &::-ms-expand{
           display: none;
@@ -107,12 +107,11 @@
         position: absolute;
         height: 0px;
         width: 0px;
-        right: 6px;
+        inset-inline-end: 6px;
         top: 50%;
         margin-top: -1px;
         border-top:  6px solid overrides.$text-color-td;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
+        border-inline : 6px solid transparent;
         border-bottom: none;
         pointer-events: none
       }
@@ -122,11 +121,8 @@
         color: variables.$text-color;
         &.disabled,
         &.disabled:hover {
-          .chevron.left:after{
-            border-right-color: variables.$text-color;
-          }
-          .chevron.right:after{
-            border-left-color: variables.$text-color;
+          .chevron:after{
+            border-inline-end-color: variables.$text-color;
           }
         }
       }

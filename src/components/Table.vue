@@ -1491,13 +1491,7 @@ export default {
     getClasses(index, element, row) {
       const { typeDef, [`${element}Class`]: custom } = this.typedColumns[index];
       let { isRight } = typeDef;
-      if (this.rtl) isRight = true;
-
-      const classes = {
-				"vgt-right-align": isRight,
-				"vgt-left-align": !isRight,
-      };
-
+      const classes = {  };
       // for td we need to check if value is
       // a function.
 			if (typeof custom === "function") {

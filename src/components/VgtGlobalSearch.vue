@@ -1,6 +1,6 @@
 <template>
 <div v-if="showControlBar" class="vgt-global-search vgt-clearfix">
-  <div class="vgt-global-search__input vgt-pull-left">
+  <div class="vgt-global-search__input vgt-pull-start">
     <form @submit.prevent v-if="searchEnabled" role="search">
       <label :for="id">
         <span aria-hidden="true" class="input__icon">
@@ -11,7 +11,7 @@
     <input
       :id="id"
       type="text"
-      class="vgt-input vgt-pull-left"
+      class="vgt-input vgt-pull-start"
       :placeholder="globalSearchPlaceholder"
       :value="value"
       @input="updateValue($event.target.value)"

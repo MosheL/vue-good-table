@@ -22,15 +22,14 @@
     padding: 1em .75em 1em .75em;
     border-bottom:  1px solid overrides2.$border-color-td;
     color: overrides2.$text-color-td;
-    &.vgt-right-align{
-      text-align: right;
-    }
+    text-align: start;
+  
   }
 
   //th
   & th.line-numbers, & th.vgt-checkbox-col {
     color: variables.$text-color;
-    border-right: 1px solid variables.$border-color;
+    border-inline-end: 1px solid variables.$border-color;
     background: overrides.$thead-bg-color-3;
   }
   thead th{
@@ -66,10 +65,10 @@
   }
   thead tr:first-child{
     th:first-child{
-      border-top-left-radius: 0.25rem;
+      border-start-start-radius: 0.25rem;
     }
     th:last-child{
-      border-top-right-radius: 0.25rem;
+      border-start-end-radius: 0.25rem;
     }
   }
   
@@ -94,7 +93,7 @@
     background: linear-gradient(overrides.$thead-bg-color-3, overrides.$thead-bg-color-3);
     .footer__row-count{
       position: relative;
-      padding-right: 3px;
+      padding-inline-end: 3px;
       &__label{
         color: variables.$secondary-text-color;
       }
@@ -107,7 +106,7 @@
         -moz-appearance: none;
         appearance: none;
         padding: 5px;
-        padding-right: 30px;
+        padding-inline-end: 30px;
         border-radius: 3px;
         box-shadow: 0 1px 2px 0 rgba(0,0,0,.05);
         border: 1px solid overrides2.$border-color-td;
@@ -124,12 +123,11 @@
         position: absolute;
         height: 0px;
         width: 0px;
-        right: 15px;
+        inset-inline-end: 15px;
         top: 50%;
         margin-top: -3px;
         border-top:  6px solid overrides2.$text-color-td;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
+        border-inline: 6px solid transparent;
         border-bottom: none;
         pointer-events: none
       }
@@ -140,10 +138,10 @@
         &.disabled,
         &.disabled:hover {
           .chevron.left:after{
-            border-right-color: variables.$text-color;
+            border-inline-start-color: variables.$text-color;
           }
           .chevron.right:after{
-            border-left-color: variables.$text-color;
+            border-inline-end-color: variables.$text-color;
           }
         }
       }
@@ -157,8 +155,8 @@
   .vgt-global-search{
     border:  1px solid variables.$border-color;
     border-bottom: 0px;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
+    border-start-start-radius: 3px;
+    border-start-end-radius: 3px;
     background: overrides.$thead-bg-color-3;
   }
   .vgt-global-search__input{

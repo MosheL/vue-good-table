@@ -2749,10 +2749,10 @@ function _sfc_render$5(_ctx, _cache, $props, $setup, $data, $options) {
             class: normalizeClass(["footer__navigation__page-btn", { disabled: !$options.firstIsPossible }]),
             onClick: _cache[2] || (_cache[2] = withModifiers((...args) => ($options.firstPage && $options.firstPage(...args)), ["prevent","stop"]))
           }, [
-            createElementVNode("span", {
+            _cache[6] || (_cache[6] = createElementVNode("span", {
               "aria-hidden": "true",
-              class: normalizeClass(["chevron", { left: !$props.rtl, right: $props.rtl }])
-            }, null, 2 /* CLASS */),
+              class: "chevron start"
+            }, null, -1 /* HOISTED */)),
             createElementVNode("span", null, toDisplayString($props.firstText), 1 /* TEXT */)
           ], 2 /* CLASS */))
         : createCommentVNode("v-if", true),
@@ -2762,10 +2762,10 @@ function _sfc_render$5(_ctx, _cache, $props, $setup, $data, $options) {
         class: normalizeClass(["footer__navigation__page-btn", { disabled: !$options.prevIsPossible }]),
         onClick: _cache[3] || (_cache[3] = withModifiers((...args) => ($options.previousPage && $options.previousPage(...args)), ["prevent","stop"]))
       }, [
-        createElementVNode("span", {
+        _cache[7] || (_cache[7] = createElementVNode("span", {
           "aria-hidden": "true",
-          class: normalizeClass(["chevron", { 'left': !$props.rtl, 'right': $props.rtl }])
-        }, null, 2 /* CLASS */),
+          class: "chevron start"
+        }, null, -1 /* HOISTED */)),
         createElementVNode("span", null, toDisplayString($props.prevText), 1 /* TEXT */)
       ], 2 /* CLASS */),
       createElementVNode("button", {
@@ -2775,10 +2775,10 @@ function _sfc_render$5(_ctx, _cache, $props, $setup, $data, $options) {
         onClick: _cache[4] || (_cache[4] = withModifiers((...args) => ($options.nextPage && $options.nextPage(...args)), ["prevent","stop"]))
       }, [
         createElementVNode("span", null, toDisplayString($props.nextText), 1 /* TEXT */),
-        createElementVNode("span", {
+        _cache[8] || (_cache[8] = createElementVNode("span", {
           "aria-hidden": "true",
-          class: normalizeClass(["chevron", { 'right': !$props.rtl, 'left': $props.rtl }])
-        }, null, 2 /* CLASS */)
+          class: "chevron end"
+        }, null, -1 /* HOISTED */))
       ], 2 /* CLASS */),
       ($props.jumpFirstOrLast)
         ? (openBlock(), createElementBlock("button", {
@@ -2789,10 +2789,10 @@ function _sfc_render$5(_ctx, _cache, $props, $setup, $data, $options) {
             onClick: _cache[5] || (_cache[5] = withModifiers((...args) => ($options.lastPage && $options.lastPage(...args)), ["prevent","stop"]))
           }, [
             createElementVNode("span", null, toDisplayString($props.lastText), 1 /* TEXT */),
-            createElementVNode("span", {
+            _cache[9] || (_cache[9] = createElementVNode("span", {
               "aria-hidden": "true",
-              class: normalizeClass(["chevron", { right: !$props.rtl, left: $props.rtl }])
-            }, null, 2 /* CLASS */)
+              class: "chevron end"
+            }, null, -1 /* HOISTED */))
           ], 2 /* CLASS */))
         : createCommentVNode("v-if", true)
     ])
@@ -2843,7 +2843,7 @@ const _hoisted_1$4 = {
   key: 0,
   class: "vgt-global-search vgt-clearfix"
 };
-const _hoisted_2$4 = { class: "vgt-global-search__input vgt-pull-left" };
+const _hoisted_2$4 = { class: "vgt-global-search__input vgt-pull-start" };
 const _hoisted_3$4 = ["for"];
 const _hoisted_4$4 = ["id", "placeholder", "value"];
 const _hoisted_5$4 = { class: "vgt-global-search__actions vgt-pull-right" };
@@ -2870,7 +2870,7 @@ function _sfc_render$4(_ctx, _cache, $props, $setup, $data, $options) {
                 createElementVNode("input", {
                   id: $data.id,
                   type: "text",
-                  class: "vgt-input vgt-pull-left",
+                  class: "vgt-input vgt-pull-start",
                   placeholder: $props.globalSearchPlaceholder,
                   value: $props.value,
                   onInput: _cache[0] || (_cache[0] = $event => ($options.updateValue($event.target.value))),
@@ -11325,14 +11325,7 @@ const _sfc_main = {
     // Get classes for the given column index & element.
     getClasses(index, element, row) {
       const { typeDef, [`${element}Class`]: custom } = this.typedColumns[index];
-      let { isRight } = typeDef;
-      if (this.rtl) isRight = true;
-
-      const classes = {
-				"vgt-right-align": isRight,
-				"vgt-left-align": !isRight,
-      };
-
+      const classes = {  };
       // for td we need to check if value is
       // a function.
 			if (typeof custom === "function") {
