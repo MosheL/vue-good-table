@@ -11713,8 +11713,7 @@ const _sfc_main = {
       }
     },
     calculateTopSize() {
-      this.$nextTick(() => { debugger;
-        console.log("ctts");
+      this.$nextTick(() => {
         const heads = this.$el.querySelectorAll('thead');
         if (!heads[1])
           return;
@@ -11739,7 +11738,7 @@ const _sfc_main = {
     this.initializeSort();
     },
     beforeUnmount() {
-      thi.ro.disconnect();
+      this.ro.disconnect();
       this.$refs.scroller.removeEventListener('scroll',this._fHeight);
     },
 
