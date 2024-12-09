@@ -2,24 +2,18 @@
 
 /* Utility styles
 ************************************************/
-.vgt-right-align{
-  text-align: right;
-}
 
-.vgt-left-align{
-  text-align: left;
-}
 
 .vgt-center-align{
   text-align: center;
 }
 
-.vgt-pull-left{
-  float:  left !important;
+.vgt-pull-start{
+  float:  inline-start !important;
 }
 
-.vgt-pull-right{
-  float:  right !important;
+.vgt-pull-end{
+  float:  inline-end !important;
 }
 
 .vgt-clearfix::after {
