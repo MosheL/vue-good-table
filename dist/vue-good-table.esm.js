@@ -10510,7 +10510,7 @@ const _sfc_main = {
     });
 
     this._fHeight = fHeight;
-    this.$refs.scroller.addEventListener('scroll', fHeight);
+    this.$refs.scroller.addEventListener('scroll', fHeight, {passive:true, useCapture: true });
     this.ro =  new ResizeObserver(fHeight);
     this.ro.observe(this.$refs.scroller);
     this.initializeSort();
