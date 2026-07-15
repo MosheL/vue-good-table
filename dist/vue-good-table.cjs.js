@@ -1,5 +1,5 @@
 /*!
-  * vue-good-table-next v0.2.2
+  * vue-good-table-next v0.2.4
   * (c) 2021-present Boris Flesch <boris@singlequote.net>
   * (c) 2017-2021 xaksis <shay@crayonbits.com>
   * @license MIT
@@ -3332,7 +3332,7 @@ const _sfc_main$2 = {
       if (this.resizing) {
         const delta =( event.pageX - this.startX)*-1; //rtl -1;
         if (!delta) return;
-        this.$emit("drag", this.resizeIndex, delta, event.target.parentNode.offsetWidth );
+        this.$emit("drag", this.resizeIndex, delta);
         this.startX = event.pageX;
       }
     },
@@ -9563,6 +9563,10 @@ const _sfc_main = {
     paginated2ScrollHeight() {
     return (this.rows.length *this.virtualPaginationOptions.height)
     },
+    virtualPaginationBottomSpacerHeight() {
+      const renderedRows = this.paginated2.reduce((count, group) => count + group.children.length, 0);
+      return Math.max(0, this.paginated2ScrollHeight - this.paginated2ScrollTop - (renderedRows * this.virtualPaginationOptions.height));
+    },
     paginated2Start() { 
       if (!this.virtualPaginationOptions.enabled) return 0;
       return Math.max(0, (this.scrollTop / this.virtualPaginationOptions.height)-1)
@@ -9730,13 +9734,23 @@ const _sfc_main = {
         this.resizeForceHandler = !this.resizeForceHandler;
         this.$emit("drag", this.columnsWidth);
       },
-      drag(index, delta, deltaOffsetWidth) {
-    
-        this.columnsWidth[index];
-        //var max = this.$el.offsetWidth;
-        var maxWidth = this.columnWidthSum;
-        var perc = (delta / deltaOffsetWidth);
-        this.columnsWidth[index] += perc * maxWidth;
+      drag(index, delta) {
+        const widths = this.columnsWidth;
+        const totalWidth = this.columnWidthSum;
+        const tableWidth = this.$refs.table?.getBoundingClientRect().width;
+        const currentWidth = widths[index];
+        const otherColumnsWidth = totalWidth - currentWidth;
+
+        if (!tableWidth || !totalWidth || otherColumnsWidth <= 0)
+          return;
+
+        const minShare = 0.08;
+        const maxShare = Math.min(0.95, Math.max((3 / this.columns.length), 0.7));
+        const currentShare = Math.min(maxShare, Math.max(minShare, currentWidth / totalWidth));
+        const targetShare = Math.min(maxShare, Math.max(minShare, currentShare + (delta / tableWidth)));
+
+        // Solve newWidth / (otherColumnsWidth + newWidth) = targetShare.
+        widths[index] = (targetShare * otherColumnsWidth) / (1 - targetShare);
         this.resizeForceHandler = !this.resizeForceHandler; //workaround - force render columnsWidth2
         this.$emit("drag", this.columnsWidth);
       },
@@ -10548,21 +10562,31 @@ const _hoisted_5 = {
 };
 const _hoisted_6 = ["id"];
 const _hoisted_7 = { key: 1 };
-const _hoisted_8 = ["onMouseenter", "onMouseleave", "onDblclick", "onClick", "onAuxclick"];
-const _hoisted_9 = {
+const _hoisted_8 = {
+  key: 0,
+  class: "vgt-virtual-spacer"
+};
+const _hoisted_9 = ["colspan"];
+const _hoisted_10 = ["onMouseenter", "onMouseleave", "onDblclick", "onClick", "onAuxclick"];
+const _hoisted_11 = {
   key: 0,
   class: "line-numbers"
 };
-const _hoisted_10 = ["onClick"];
-const _hoisted_11 = ["disabled", "checked"];
-const _hoisted_12 = ["onClick", "data-label"];
-const _hoisted_13 = { key: 0 };
-const _hoisted_14 = ["innerHTML"];
-const _hoisted_15 = ["colspan"];
-const _hoisted_16 = ["colspan"];
-const _hoisted_17 = { key: 0 };
+const _hoisted_12 = ["onClick"];
+const _hoisted_13 = ["disabled", "checked"];
+const _hoisted_14 = ["onClick", "data-label"];
+const _hoisted_15 = { key: 0 };
+const _hoisted_16 = ["innerHTML"];
+const _hoisted_17 = ["colspan"];
 const _hoisted_18 = ["colspan"];
 const _hoisted_19 = {
+  key: 1,
+  class: "vgt-virtual-spacer"
+};
+const _hoisted_20 = ["colspan"];
+const _hoisted_21 = { key: 2 };
+const _hoisted_22 = ["colspan"];
+const _hoisted_23 = {
   key: 2,
   class: "vgt-wrap__actions-footer"
 };
@@ -10715,8 +10739,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         vue.createElementVNode("table", {
           id: "vgt-table",
           ref: "table",
-          class: vue.normalizeClass($options.tableStyles),
-          style: vue.normalizeStyle({'transform':  $props.virtualPaginationOptions.enabled ? 'translate(0,' + $options.paginated2ScrollTop +'px)'  :'unset' })
+          class: vue.normalizeClass($options.tableStyles)
         }, [
           vue.createElementVNode("colgroup", null, [
             (_ctx.selectable)
@@ -10737,6 +10760,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
             onToggleExpandRowsAll: $options.toggleExpandRowsAll,
             onSortChange: $options.changeSort,
             onFilterChanged: $options.filterRows,
+            onDrag: $options.drag,
+            onResetResize: $options.resetResize,
             columns: $props.columns,
             "line-numbers": $props.lineNumbers,
             selectable: _ctx.selectable,
@@ -10766,8 +10791,18 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                 : (vue.openBlock(), vue.createElementBlock("span", _hoisted_7))
             ]),
             _: 3 /* FORWARDED */
-          }, 8 /* PROPS */, ["onToggleSelectAll", "onToggleExpandRowsAll", "onSortChange", "onFilterChanged", "columns", "line-numbers", "selectable", "all-selected", "all-selected-indeterminate", "mode", "sortable", "multiple-column-sort", "typed-columns", "getClasses", "searchEnabled"]),
+          }, 8 /* PROPS */, ["onToggleSelectAll", "onToggleExpandRowsAll", "onSortChange", "onFilterChanged", "onDrag", "onResetResize", "columns", "line-numbers", "selectable", "all-selected", "all-selected-indeterminate", "mode", "sortable", "multiple-column-sort", "typed-columns", "getClasses", "searchEnabled"]),
           vue.createCommentVNode(" Table body starts here "),
+          ($props.virtualPaginationOptions.enabled)
+            ? (vue.openBlock(), vue.createElementBlock("tbody", _hoisted_8, [
+                vue.createElementVNode("tr", null, [
+                  vue.createElementVNode("td", {
+                    colspan: $options.fullColspan,
+                    style: vue.normalizeStyle({ height: `${$options.paginated2ScrollTop}px`, padding: 0 })
+                  }, null, 12 /* STYLE, PROPS */, _hoisted_9)
+                ])
+              ]))
+            : vue.createCommentVNode("v-if", true),
           (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.paginated2, (headerRow, hIndex) => {
             return (vue.openBlock(), vue.createElementBlock("tbody", { key: hIndex }, [
               vue.createCommentVNode(" if group row header is at the top "),
@@ -10818,7 +10853,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                         onAuxclick: $event => ($options.onRowAuxClicked(row, index, $event))
                       }, [
                         ($props.lineNumbers)
-                          ? (vue.openBlock(), vue.createElementBlock("th", _hoisted_9, vue.toDisplayString($options.getCurrentIndex(row.originalIndex)), 1 /* TEXT */))
+                          ? (vue.openBlock(), vue.createElementBlock("th", _hoisted_11, vue.toDisplayString($options.getCurrentIndex(row.originalIndex)), 1 /* TEXT */))
                           : vue.createCommentVNode("v-if", true),
                         (_ctx.selectable)
                           ? (vue.openBlock(), vue.createElementBlock("th", {
@@ -10830,8 +10865,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                                 type: "checkbox",
                                 disabled: row.vgtDisabled,
                                 checked: row.vgtSelected
-                              }, null, 8 /* PROPS */, _hoisted_11)
-                            ], 8 /* PROPS */, _hoisted_10))
+                              }, null, 8 /* PROPS */, _hoisted_13)
+                            ], 8 /* PROPS */, _hoisted_12))
                           : vue.createCommentVNode("v-if", true),
                         (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($props.columns, (column, i) => {
                           return (vue.openBlock(), vue.createElementBlock(vue.Fragment, null, [
@@ -10850,17 +10885,17 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                                     expandedRow: _ctx.expandedRowIndex === index
                                   }, () => [
                                     (!column.html)
-                                      ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_13, vue.toDisplayString($options.collectFormatted(row, column)), 1 /* TEXT */))
+                                      ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_15, vue.toDisplayString($options.collectFormatted(row, column)), 1 /* TEXT */))
                                       : (vue.openBlock(), vue.createElementBlock("span", {
                                           key: 1,
                                           innerHTML: $options.collect(row, column.field)
-                                        }, null, 8 /* PROPS */, _hoisted_14))
+                                        }, null, 8 /* PROPS */, _hoisted_16))
                                   ])
-                                ], 10 /* CLASS, PROPS */, _hoisted_12))
+                                ], 10 /* CLASS, PROPS */, _hoisted_14))
                               : vue.createCommentVNode("v-if", true)
                           ], 64 /* STABLE_FRAGMENT */))
                         }), 256 /* UNKEYED_FRAGMENT */))
-                      ], 42 /* CLASS, PROPS, NEED_HYDRATION */, _hoisted_8))
+                      ], 42 /* CLASS, PROPS, NEED_HYDRATION */, _hoisted_10))
                     : vue.createCommentVNode("v-if", true),
                   (_ctx.expandedRowIndex === index)
                     ? (vue.openBlock(), vue.createElementBlock("tr", {
@@ -10873,14 +10908,14 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                             formattedRow: $options.formattedRow(row),
                             index: index
                           })
-                        ], 8 /* PROPS */, _hoisted_15)
+                        ], 8 /* PROPS */, _hoisted_17)
                       ], 2 /* CLASS */))
                     : vue.createCommentVNode("v-if", true),
                   (row['expanded'])
                     ? (vue.openBlock(), vue.createElementBlock("tr", {
                         key: row.originalIndex
                       }, [
-                        vue.createElementVNode("td", { colspan: $options.fullColspan }, vue.toDisplayString(row["expandedRow"]), 9 /* TEXT, PROPS */, _hoisted_16)
+                        vue.createElementVNode("td", { colspan: $options.fullColspan }, vue.toDisplayString(row["expandedRow"]), 9 /* TEXT, PROPS */, _hoisted_18)
                       ]))
                     : vue.createCommentVNode("v-if", true)
                 ], 64 /* STABLE_FRAGMENT */))
@@ -10918,27 +10953,31 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                 : vue.createCommentVNode("v-if", true)
             ]))
           }), 128 /* KEYED_FRAGMENT */)),
+          ($props.virtualPaginationOptions.enabled)
+            ? (vue.openBlock(), vue.createElementBlock("tbody", _hoisted_19, [
+                vue.createElementVNode("tr", null, [
+                  vue.createElementVNode("td", {
+                    colspan: $options.fullColspan,
+                    style: vue.normalizeStyle({ height: `${$options.virtualPaginationBottomSpacerHeight}px`, padding: 0 })
+                  }, null, 12 /* STYLE, PROPS */, _hoisted_20)
+                ])
+              ]))
+            : vue.createCommentVNode("v-if", true),
           ($options.showEmptySlot)
-            ? (vue.openBlock(), vue.createElementBlock("tbody", _hoisted_17, [
+            ? (vue.openBlock(), vue.createElementBlock("tbody", _hoisted_21, [
                 vue.createElementVNode("tr", null, [
                   vue.createElementVNode("td", { colspan: $options.fullColspan }, [
                     vue.renderSlot(_ctx.$slots, "emptystate", {}, () => [
                       _cache[3] || (_cache[3] = vue.createElementVNode("div", { class: "vgt-center-align vgt-text-disabled" }, " No data for table ", -1 /* HOISTED */))
                     ])
-                  ], 8 /* PROPS */, _hoisted_18)
+                  ], 8 /* PROPS */, _hoisted_22)
                 ])
               ]))
             : vue.createCommentVNode("v-if", true)
-        ], 6 /* CLASS, STYLE */),
-        ($props.virtualPaginationOptions.enabled)
-          ? (vue.openBlock(), vue.createElementBlock("div", {
-              key: 0,
-              style: vue.normalizeStyle({height: $options.paginated2ScrollHeight +'px', 'background-color': 'red' } )
-            }, null, 4 /* STYLE */))
-          : vue.createCommentVNode("v-if", true)
+        ], 2 /* CLASS */)
       ], 6 /* CLASS, STYLE */),
       ($options.hasFooterSlot)
-        ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_19, [
+        ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_23, [
             vue.renderSlot(_ctx.$slots, "table-actions-bottom")
           ]))
         : vue.createCommentVNode("v-if", true),

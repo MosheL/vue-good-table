@@ -105,8 +105,7 @@
         </table>
       </div>
 			<div :class="{ 'vgt-responsive': responsive }" :style="wrapperStyles" ref="scroller">
-				<table id="vgt-table" ref="table" :class="tableStyles"
-				:style="{'transform':  virtualPaginationOptions.enabled ? 'translate(0,' + paginated2ScrollTop +'px)'  :'unset' }">
+				<table id="vgt-table" ref="table" :class="tableStyles">
         <colgroup>
           <col v-if="selectable" style="width: auto" />
           <col v-for="(column, index) in columns" :key="index" :id="`col-${index}`"  :style="columnsWidth2[index]">
@@ -118,6 +117,8 @@
 						@toggle-expand-rows-all="toggleExpandRowsAll"
 						@sort-change="changeSort"
             @filter-changed="filterRows"
+						@drag="drag"
+						@resetResize="resetResize"
             :columns="columns"
             :line-numbers="lineNumbers"
             :selectable="selectable"
@@ -146,6 +147,9 @@
 					</vgt-table-header>
 
           <!-- Table body starts here -->
+					<tbody v-if="virtualPaginationOptions.enabled" class="vgt-virtual-spacer">
+						<tr><td :colspan="fullColspan" :style="{ height: `${paginated2ScrollTop}px`, padding: 0 }" /></tr>
+					</tbody>
 					<tbody v-for="(headerRow, hIndex) in paginated2" :key="hIndex">
             <!-- if group row header is at the top -->
             <vgt-header-row
@@ -282,6 +286,10 @@
             </vgt-header-row>
           </tbody>
 
+					<tbody v-if="virtualPaginationOptions.enabled" class="vgt-virtual-spacer">
+						<tr><td :colspan="fullColspan" :style="{ height: `${virtualPaginationBottomSpacerHeight}px`, padding: 0 }" /></tr>
+					</tbody>
+
           <tbody v-if="showEmptySlot">
             <tr>
               <td :colspan="fullColspan">
@@ -294,8 +302,6 @@
             </tr>
           </tbody>
         </table>
-
-         <div v-if="virtualPaginationOptions.enabled" :style="{height: paginated2ScrollHeight +'px', 'background-color': 'red' } " /> 
       </div>
       <div v-if="hasFooterSlot" class="vgt-wrap__actions-footer">
 				<slot name="table-actions-bottom"> </slot>
@@ -935,6 +941,10 @@ export default {
     paginated2ScrollHeight() {
     return (this.rows.length *this.virtualPaginationOptions.height)
     },
+    virtualPaginationBottomSpacerHeight() {
+      const renderedRows = this.paginated2.reduce((count, group) => count + group.children.length, 0);
+      return Math.max(0, this.paginated2ScrollHeight - this.paginated2ScrollTop - (renderedRows * this.virtualPaginationOptions.height));
+    },
     paginated2Start() { 
       if (!this.virtualPaginationOptions.enabled) return 0;
       return Math.max(0, (this.scrollTop / this.virtualPaginationOptions.height)-1)
@@ -1106,13 +1116,23 @@ export default {
         this.resizeForceHandler = !this.resizeForceHandler;
         this.$emit("drag", this.columnsWidth);
       },
-      drag(index, delta, deltaOffsetWidth) {
-    
-        var w = this.columnsWidth[index];
-        //var max = this.$el.offsetWidth;
-        var maxWidth = this.columnWidthSum;
-        var perc = (delta / deltaOffsetWidth);
-        this.columnsWidth[index] += perc * maxWidth;
+      drag(index, delta) {
+        const widths = this.columnsWidth;
+        const totalWidth = this.columnWidthSum;
+        const tableWidth = this.$refs.table?.getBoundingClientRect().width;
+        const currentWidth = widths[index];
+        const otherColumnsWidth = totalWidth - currentWidth;
+
+        if (!tableWidth || !totalWidth || otherColumnsWidth <= 0)
+          return;
+
+        const minShare = 0.08;
+        const maxShare = Math.min(0.95, Math.max((3 / this.columns.length), 0.7));
+        const currentShare = Math.min(maxShare, Math.max(minShare, currentWidth / totalWidth));
+        const targetShare = Math.min(maxShare, Math.max(minShare, currentShare + (delta / tableWidth)));
+
+        // Solve newWidth / (otherColumnsWidth + newWidth) = targetShare.
+        widths[index] = (targetShare * otherColumnsWidth) / (1 - targetShare);
         this.resizeForceHandler = !this.resizeForceHandler //workaround - force render columnsWidth2
         this.$emit("drag", this.columnsWidth);
       },

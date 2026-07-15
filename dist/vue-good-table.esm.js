@@ -1,5 +1,5 @@
 /*!
-  * vue-good-table-next v0.2.2
+  * vue-good-table-next v0.2.4
   * (c) 2021-present Boris Flesch <boris@singlequote.net>
   * (c) 2017-2021 xaksis <shay@crayonbits.com>
   * @license MIT
@@ -3328,7 +3328,7 @@ const _sfc_main$2 = {
       if (this.resizing) {
         const delta =( event.pageX - this.startX)*-1; //rtl -1;
         if (!delta) return;
-        this.$emit("drag", this.resizeIndex, delta, event.target.parentNode.offsetWidth );
+        this.$emit("drag", this.resizeIndex, delta);
         this.startX = event.pageX;
       }
     },
@@ -9559,6 +9559,10 @@ const _sfc_main = {
     paginated2ScrollHeight() {
     return (this.rows.length *this.virtualPaginationOptions.height)
     },
+    virtualPaginationBottomSpacerHeight() {
+      const renderedRows = this.paginated2.reduce((count, group) => count + group.children.length, 0);
+      return Math.max(0, this.paginated2ScrollHeight - this.paginated2ScrollTop - (renderedRows * this.virtualPaginationOptions.height));
+    },
     paginated2Start() { 
       if (!this.virtualPaginationOptions.enabled) return 0;
       return Math.max(0, (this.scrollTop / this.virtualPaginationOptions.height)-1)
@@ -9726,13 +9730,23 @@ const _sfc_main = {
         this.resizeForceHandler = !this.resizeForceHandler;
         this.$emit("drag", this.columnsWidth);
       },
-      drag(index, delta, deltaOffsetWidth) {
-    
-        this.columnsWidth[index];
-        //var max = this.$el.offsetWidth;
-        var maxWidth = this.columnWidthSum;
-        var perc = (delta / deltaOffsetWidth);
-        this.columnsWidth[index] += perc * maxWidth;
+      drag(index, delta) {
+        const widths = this.columnsWidth;
+        const totalWidth = this.columnWidthSum;
+        const tableWidth = this.$refs.table?.getBoundingClientRect().width;
+        const currentWidth = widths[index];
+        const otherColumnsWidth = totalWidth - currentWidth;
+
+        if (!tableWidth || !totalWidth || otherColumnsWidth <= 0)
+          return;
+
+        const minShare = 0.08;
+        const maxShare = Math.min(0.95, Math.max((3 / this.columns.length), 0.7));
+        const currentShare = Math.min(maxShare, Math.max(minShare, currentWidth / totalWidth));
+        const targetShare = Math.min(maxShare, Math.max(minShare, currentShare + (delta / tableWidth)));
+
+        // Solve newWidth / (otherColumnsWidth + newWidth) = targetShare.
+        widths[index] = (targetShare * otherColumnsWidth) / (1 - targetShare);
         this.resizeForceHandler = !this.resizeForceHandler; //workaround - force render columnsWidth2
         this.$emit("drag", this.columnsWidth);
       },
@@ -10544,21 +10558,31 @@ const _hoisted_5 = {
 };
 const _hoisted_6 = ["id"];
 const _hoisted_7 = { key: 1 };
-const _hoisted_8 = ["onMouseenter", "onMouseleave", "onDblclick", "onClick", "onAuxclick"];
-const _hoisted_9 = {
+const _hoisted_8 = {
+  key: 0,
+  class: "vgt-virtual-spacer"
+};
+const _hoisted_9 = ["colspan"];
+const _hoisted_10 = ["onMouseenter", "onMouseleave", "onDblclick", "onClick", "onAuxclick"];
+const _hoisted_11 = {
   key: 0,
   class: "line-numbers"
 };
-const _hoisted_10 = ["onClick"];
-const _hoisted_11 = ["disabled", "checked"];
-const _hoisted_12 = ["onClick", "data-label"];
-const _hoisted_13 = { key: 0 };
-const _hoisted_14 = ["innerHTML"];
-const _hoisted_15 = ["colspan"];
-const _hoisted_16 = ["colspan"];
-const _hoisted_17 = { key: 0 };
+const _hoisted_12 = ["onClick"];
+const _hoisted_13 = ["disabled", "checked"];
+const _hoisted_14 = ["onClick", "data-label"];
+const _hoisted_15 = { key: 0 };
+const _hoisted_16 = ["innerHTML"];
+const _hoisted_17 = ["colspan"];
 const _hoisted_18 = ["colspan"];
 const _hoisted_19 = {
+  key: 1,
+  class: "vgt-virtual-spacer"
+};
+const _hoisted_20 = ["colspan"];
+const _hoisted_21 = { key: 2 };
+const _hoisted_22 = ["colspan"];
+const _hoisted_23 = {
   key: 2,
   class: "vgt-wrap__actions-footer"
 };
@@ -10711,8 +10735,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         createElementVNode("table", {
           id: "vgt-table",
           ref: "table",
-          class: normalizeClass($options.tableStyles),
-          style: normalizeStyle({'transform':  $props.virtualPaginationOptions.enabled ? 'translate(0,' + $options.paginated2ScrollTop +'px)'  :'unset' })
+          class: normalizeClass($options.tableStyles)
         }, [
           createElementVNode("colgroup", null, [
             (_ctx.selectable)
@@ -10733,6 +10756,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
             onToggleExpandRowsAll: $options.toggleExpandRowsAll,
             onSortChange: $options.changeSort,
             onFilterChanged: $options.filterRows,
+            onDrag: $options.drag,
+            onResetResize: $options.resetResize,
             columns: $props.columns,
             "line-numbers": $props.lineNumbers,
             selectable: _ctx.selectable,
@@ -10762,8 +10787,18 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                 : (openBlock(), createElementBlock("span", _hoisted_7))
             ]),
             _: 3 /* FORWARDED */
-          }, 8 /* PROPS */, ["onToggleSelectAll", "onToggleExpandRowsAll", "onSortChange", "onFilterChanged", "columns", "line-numbers", "selectable", "all-selected", "all-selected-indeterminate", "mode", "sortable", "multiple-column-sort", "typed-columns", "getClasses", "searchEnabled"]),
+          }, 8 /* PROPS */, ["onToggleSelectAll", "onToggleExpandRowsAll", "onSortChange", "onFilterChanged", "onDrag", "onResetResize", "columns", "line-numbers", "selectable", "all-selected", "all-selected-indeterminate", "mode", "sortable", "multiple-column-sort", "typed-columns", "getClasses", "searchEnabled"]),
           createCommentVNode(" Table body starts here "),
+          ($props.virtualPaginationOptions.enabled)
+            ? (openBlock(), createElementBlock("tbody", _hoisted_8, [
+                createElementVNode("tr", null, [
+                  createElementVNode("td", {
+                    colspan: $options.fullColspan,
+                    style: normalizeStyle({ height: `${$options.paginated2ScrollTop}px`, padding: 0 })
+                  }, null, 12 /* STYLE, PROPS */, _hoisted_9)
+                ])
+              ]))
+            : createCommentVNode("v-if", true),
           (openBlock(true), createElementBlock(Fragment, null, renderList($options.paginated2, (headerRow, hIndex) => {
             return (openBlock(), createElementBlock("tbody", { key: hIndex }, [
               createCommentVNode(" if group row header is at the top "),
@@ -10814,7 +10849,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                         onAuxclick: $event => ($options.onRowAuxClicked(row, index, $event))
                       }, [
                         ($props.lineNumbers)
-                          ? (openBlock(), createElementBlock("th", _hoisted_9, toDisplayString($options.getCurrentIndex(row.originalIndex)), 1 /* TEXT */))
+                          ? (openBlock(), createElementBlock("th", _hoisted_11, toDisplayString($options.getCurrentIndex(row.originalIndex)), 1 /* TEXT */))
                           : createCommentVNode("v-if", true),
                         (_ctx.selectable)
                           ? (openBlock(), createElementBlock("th", {
@@ -10826,8 +10861,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                                 type: "checkbox",
                                 disabled: row.vgtDisabled,
                                 checked: row.vgtSelected
-                              }, null, 8 /* PROPS */, _hoisted_11)
-                            ], 8 /* PROPS */, _hoisted_10))
+                              }, null, 8 /* PROPS */, _hoisted_13)
+                            ], 8 /* PROPS */, _hoisted_12))
                           : createCommentVNode("v-if", true),
                         (openBlock(true), createElementBlock(Fragment, null, renderList($props.columns, (column, i) => {
                           return (openBlock(), createElementBlock(Fragment, null, [
@@ -10846,17 +10881,17 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                                     expandedRow: _ctx.expandedRowIndex === index
                                   }, () => [
                                     (!column.html)
-                                      ? (openBlock(), createElementBlock("span", _hoisted_13, toDisplayString($options.collectFormatted(row, column)), 1 /* TEXT */))
+                                      ? (openBlock(), createElementBlock("span", _hoisted_15, toDisplayString($options.collectFormatted(row, column)), 1 /* TEXT */))
                                       : (openBlock(), createElementBlock("span", {
                                           key: 1,
                                           innerHTML: $options.collect(row, column.field)
-                                        }, null, 8 /* PROPS */, _hoisted_14))
+                                        }, null, 8 /* PROPS */, _hoisted_16))
                                   ])
-                                ], 10 /* CLASS, PROPS */, _hoisted_12))
+                                ], 10 /* CLASS, PROPS */, _hoisted_14))
                               : createCommentVNode("v-if", true)
                           ], 64 /* STABLE_FRAGMENT */))
                         }), 256 /* UNKEYED_FRAGMENT */))
-                      ], 42 /* CLASS, PROPS, NEED_HYDRATION */, _hoisted_8))
+                      ], 42 /* CLASS, PROPS, NEED_HYDRATION */, _hoisted_10))
                     : createCommentVNode("v-if", true),
                   (_ctx.expandedRowIndex === index)
                     ? (openBlock(), createElementBlock("tr", {
@@ -10869,14 +10904,14 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                             formattedRow: $options.formattedRow(row),
                             index: index
                           })
-                        ], 8 /* PROPS */, _hoisted_15)
+                        ], 8 /* PROPS */, _hoisted_17)
                       ], 2 /* CLASS */))
                     : createCommentVNode("v-if", true),
                   (row['expanded'])
                     ? (openBlock(), createElementBlock("tr", {
                         key: row.originalIndex
                       }, [
-                        createElementVNode("td", { colspan: $options.fullColspan }, toDisplayString(row["expandedRow"]), 9 /* TEXT, PROPS */, _hoisted_16)
+                        createElementVNode("td", { colspan: $options.fullColspan }, toDisplayString(row["expandedRow"]), 9 /* TEXT, PROPS */, _hoisted_18)
                       ]))
                     : createCommentVNode("v-if", true)
                 ], 64 /* STABLE_FRAGMENT */))
@@ -10914,27 +10949,31 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
                 : createCommentVNode("v-if", true)
             ]))
           }), 128 /* KEYED_FRAGMENT */)),
+          ($props.virtualPaginationOptions.enabled)
+            ? (openBlock(), createElementBlock("tbody", _hoisted_19, [
+                createElementVNode("tr", null, [
+                  createElementVNode("td", {
+                    colspan: $options.fullColspan,
+                    style: normalizeStyle({ height: `${$options.virtualPaginationBottomSpacerHeight}px`, padding: 0 })
+                  }, null, 12 /* STYLE, PROPS */, _hoisted_20)
+                ])
+              ]))
+            : createCommentVNode("v-if", true),
           ($options.showEmptySlot)
-            ? (openBlock(), createElementBlock("tbody", _hoisted_17, [
+            ? (openBlock(), createElementBlock("tbody", _hoisted_21, [
                 createElementVNode("tr", null, [
                   createElementVNode("td", { colspan: $options.fullColspan }, [
                     renderSlot(_ctx.$slots, "emptystate", {}, () => [
                       _cache[3] || (_cache[3] = createElementVNode("div", { class: "vgt-center-align vgt-text-disabled" }, " No data for table ", -1 /* HOISTED */))
                     ])
-                  ], 8 /* PROPS */, _hoisted_18)
+                  ], 8 /* PROPS */, _hoisted_22)
                 ])
               ]))
             : createCommentVNode("v-if", true)
-        ], 6 /* CLASS, STYLE */),
-        ($props.virtualPaginationOptions.enabled)
-          ? (openBlock(), createElementBlock("div", {
-              key: 0,
-              style: normalizeStyle({height: $options.paginated2ScrollHeight +'px', 'background-color': 'red' } )
-            }, null, 4 /* STYLE */))
-          : createCommentVNode("v-if", true)
+        ], 2 /* CLASS */)
       ], 6 /* CLASS, STYLE */),
       ($options.hasFooterSlot)
-        ? (openBlock(), createElementBlock("div", _hoisted_19, [
+        ? (openBlock(), createElementBlock("div", _hoisted_23, [
             renderSlot(_ctx.$slots, "table-actions-bottom")
           ]))
         : createCommentVNode("v-if", true),
